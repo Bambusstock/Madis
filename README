@@ -21,6 +21,7 @@ Known Bugs
 ----------
 
 Because this plugin is in a early development state there are many known bugs:
+
 - Diamond ore is directly dropped, instead of single diamond
 - Lapis ore is directly dropped, instead of group of lapis
 - Redsonte ore is directly dropped, instead of group of redstone
