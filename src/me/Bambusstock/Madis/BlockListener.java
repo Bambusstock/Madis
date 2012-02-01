@@ -1,19 +1,23 @@
 package me.Bambusstock.Madis;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockDispenseEvent;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Dispenser; //important!
+import org.bukkit.material.Dispenser;
 import org.bukkit.material.MaterialData;
-import java.util.ArrayList;
 
 public class BlockListener implements Listener{
+	Logger log = Logger.getLogger("Minecraft");
+	
 	/**
 	 * Shovels and their blocks
 	 */
@@ -44,46 +48,46 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * Drop items
+	 * Drop items. Its important to set the amount
+	 * of the ItemStack, else just a 'item picture'
+	 * is dropped. You can take this in your inventory.
 	 * @param block Block
 	 * @param tool Tool
 	 */
 	public void dropItems(Block block, ItemStack tool) {
-		if(tool.getTypeId() == 285) {
-			World w = block.getWorld();
-			Location l = block.getLocation();
-			switch (block.getType()) {
-				case DIAMOND_ORE:
-					ItemStack diamond_ore = new ItemStack(Material.DIAMOND_ORE);
-					diamond_ore.setAmount(1);
-					w.dropItem(l, diamond_ore);
-					break;
-				case IRON_ORE:
-					ItemStack iron_ore = new ItemStack(Material.IRON_ORE);
-					iron_ore.setAmount(1);
-					w.dropItem(l, iron_ore);
-					break;
-				case GOLD_ORE:
-					ItemStack gold_ore = new ItemStack(Material.GOLD_ORE);
-					gold_ore.setAmount(1);
-					w.dropItem(l, gold_ore);
-					break;
-				case LAPIS_ORE:
-					 ItemStack lapis_ore = new ItemStack(Material.LAPIS_ORE);
-					 lapis_ore.setAmount(1);
-					 w.dropItem(l, lapis_ore);
-					break;
-				case REDSTONE_ORE:
-					ItemStack redstone_ore = new ItemStack(Material.REDSTONE_ORE); 
-					redstone_ore.setAmount(1);
-					w.dropItem(l, redstone_ore);
-					break;
-				default:
-					block.breakNaturally(tool);					
-			}
-				
+		switch(tool.getType()) {
+			case GOLD_PICKAXE:
+				World w = block.getWorld();
+				Location l = block.getLocation();
+				switch (block.getType()) {
+					case DIAMOND_ORE:
+						ItemStack diamond_ore = new ItemStack(Material.DIAMOND, 1);
+						w.dropItem(l, diamond_ore);
+						break;
+					case IRON_ORE:
+						ItemStack iron_ore = new ItemStack(Material.IRON_ORE, 1);
+						w.dropItem(l, iron_ore);
+						break;
+					case GOLD_ORE:
+						ItemStack gold_ore = new ItemStack(Material.GOLD_ORE);
+						w.dropItem(l, gold_ore);
+						break;
+					case LAPIS_ORE:
+						 ItemStack lapis_ore = new ItemStack(Material.LAPIS_BLOCK, 1);
+						 w.dropItem(l, lapis_ore);
+						break;
+					case REDSTONE_ORE:
+						ItemStack redstone_ore = new ItemStack(Material.REDSTONE, 4); 
+						w.dropItem(l, redstone_ore);
+						break;
+					default:
+						block.breakNaturally(tool);					
+				}
+				break;
+			case GOLD_SPADE:
+			default:
+				block.breakNaturally(tool);
 		}
-		
 	}
 	
 	/**
@@ -104,7 +108,7 @@ public class BlockListener implements Listener{
 			blockStack.add(nextBlockState);
 			
 			// exit if their is a air block
-			if(nextBlock.getTypeId() == 0) i = 64;
+			if(nextBlock.getType() == Material.AIR) i = 64;
 		}
 		return blockStack;
 	}
@@ -125,10 +129,10 @@ public class BlockListener implements Listener{
 		for(int i=0; i < 128; i++) {
 			nextBlock = nextBlock.getRelative(direction);
 			// Takes one block end break.
-			if(nextBlock.getTypeId() != 0 && !this.arrayIntContains(endType, nextBlock.getTypeId())) {
+			if(nextBlock.getType() != Material.AIR && !this.arrayIntContains(endType, nextBlock.getTypeId())) {
 				break;
 			}
-			else if(nextBlock.getTypeId() != 0 && this.arrayIntContains(endType, nextBlock.getTypeId())) {
+			else if(nextBlock.getType() != Material.AIR && this.arrayIntContains(endType, nextBlock.getTypeId())) {
 				BlockState nextBlockState = nextBlock.getState();					
 				blockStack.add(nextBlockState);
 				break;
@@ -186,9 +190,7 @@ public class BlockListener implements Listener{
 		for(int i=0; i < stack.size(); i++) {
 			BlockState blockState = stack.get(i);
 			Block block = blockState.getBlock();
-			if(blockState.getType() != Material.AIR) {
-				this.dropItems(block, tool);
-			}
+			if(blockState.getType() != Material.AIR) this.dropItems(block, tool);
 			block.setTypeId(0);
 		}
 	}
@@ -208,13 +210,13 @@ public class BlockListener implements Listener{
 			// Shovel
 			if(this.arrayIntContains(this.shovelIDs, dispensedItem.getTypeId())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.shovelBlocks, dispenserFacing);
-				ItemStack tool = new ItemStack(284); // golden shovel
+				ItemStack tool = new ItemStack(Material.GOLD_SPADE);
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			//Pickaxe
 			else if(this.arrayIntContains(this.pickIDs, dispensedItem.getTypeId())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.pickBlocks, dispenserFacing);
-				ItemStack tool = new ItemStack(285); // gold pickaxe
+				ItemStack tool = new ItemStack(Material.GOLD_PICKAXE);
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			else if(dispensedItem.getTypeId() < 96){
