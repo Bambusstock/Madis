@@ -9,7 +9,7 @@ How does it work?
 ### Placing blocks
 
 All you need is a obsidian block, a dispenser and a lever, button or something equal. Place the obsidian block behind your dispenser, add the button and put a block into the dispenser. Click the button/lever and watch the magic.
-Actually not all blocks and items are supported. In general you could use all blocks including water and lava. Items are a little bit tricky. In any case you could put rails and fences into the dispenser. 
+Actually not all blocks and items are supported. In general you could use all blocks including water and lava. Items are a little bit tricky. In any case you could put rails and fences into the dispenser.
 __Keep in mind, that the dispenser just place 64 blocks and then stops until a block is removed. You know this behaivor from pistons.__
 
 
@@ -26,3 +26,10 @@ Because this plugin is in a early development state there are many known bugs:
 - Redsonte ore is directly dropped, instead of group of redstone
 - The golden tools (pickaxe, shovel) take no damage inside the dispenser
 - The block stack inside the dispenser doesn't decrease (cheat potential ;))
+
+TODO:
+-----
+
+- Bug fixing ;)
+- Add comments
+- Replace Block-IDs with constants
