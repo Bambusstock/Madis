@@ -26,27 +26,25 @@ public class BlockListener implements Listener{
 	final int[] pickIDs = {285};
 	final int[] pickBlocks = {1, 4, 14, 15, 16, 21, 24, 48, 49, 56, 73, 74};
 	
-	public Madis plugin; // wichitg?
+	public Madis plugin; // important? or depracted?
 		
 	/**
-	 * Durchsucht Array nach gg. Integer-Wert.
+	 * Search for a value inside a array.
 	 * 
-	 * @param arr Array das durchsucht wird.
-	 * @param val Wert der enthalten sein soll.
+	 * @param arr Array to go through 
+	 * @param val Target value
 	 * 
-	 * @return True wenn enthalten
+	 * @return true if contained
 	 */
 	public Boolean arrayIntContains(int[] arr, int val) {
 		for(int i=0; i < arr.length; i++) {
-			if(arr[i] == val) {
-				return true;
-			}
+			if(arr[i] == val) return true;
 		}
 		return false;
 	}
 	
 	/**
-	 * Spuckt Items aus.
+	 * Drop items
 	 * @param block Block
 	 * @param tool Tool
 	 */
@@ -89,50 +87,44 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * 	Liest maximal 64 Blöcke bzw. bis zu einem Luftblock.
-	 *  Die Blöcken werden als BlockState Objekt gespeichert,
-	 *  da diese nicht mehr verändert werden können. Siehe
-	 *  auch <proceedBlockStack>.
+	 * 	Read maximal 64 blocks or stops at air block.
+	 *  Blocks save as BlockState-Object, so they can't changed.
 	 *  
-	 *  @param startPos Startposition
-	 *  @param direction Richtung
+	 *  @param startPos start
+	 *  @param direction Direction
 	 *   
-	 *   @return Liste mit Blöcken bis zum Endpunkt.
+	 *   @return List of blocks until the end.
 	 */
 	public ArrayList<BlockState> readBlocks(Block startPos, BlockFace direction) {
-		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // Speichert Blöcke vor Dispenser
-		Block nextBlock = startPos; // Dispenser auswählen um später in richtige Richtung zu lesen
+		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
+		Block nextBlock = startPos; // dispenser/ start block
 		for(int i=0; i < 64; i++) {
-			// nextBlock = this.getBlockInDirection(nextBlock, direction); // Block lesen
 			nextBlock = nextBlock.getRelative(direction);
 			BlockState nextBlockState = nextBlock.getState();					
 			blockStack.add(nextBlockState);
 			
-			// Auch aussteigen, wenn Luft gegriffen wird
+			// exit if their is a air block
 			if(nextBlock.getTypeId() == 0) i = 64;
 		}
 		return blockStack;
 	}
 	
 	/**
-	 * Liest alle Blöcke bis zu einem gewissen Block bzw. BlockTyp (arg1).
-	 * Findet also alle Blöcke bis zu einem Block mit bestimmtem Typ.
-	 * Die Reichweite beträgt 128 Blöcke.
+	 * Read all blocks until a specified block resp. block typ.
+	 * Range amount 128 blocks.
 	 * 
-	 * @param startPos Startposition
-	 * @param endType Blocktyp der Endposition
-	 * @param direction Richtung
+	 * @param startPos start block
+	 * @param endType block typ
+	 * @param direction direction
 	 * 
-	 * @return Stack mit allen Blöcken bis dahin
+	 * @return Block stack
 	 */
 	public ArrayList<BlockState> readBlocksUntil(Block startPos, int[] endType, BlockFace direction) {
-		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // Speichert Blöcke vor Dispenser
-		Block nextBlock = startPos; // Dispenser auswählen um später in richtige Richtung zu lesen
-		
+		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
+		Block nextBlock = startPos; // dispenser/start block	
 		for(int i=0; i < 128; i++) {
-			//nextBlock = this.getBlockInDirection(nextBlock, direction); // Block lesen
 			nextBlock = nextBlock.getRelative(direction);
-			// Nimmt auto. nur einen Block auf und beendet sich dann.
+			// Takes one block end break.
 			if(nextBlock.getTypeId() != 0 && !this.arrayIntContains(endType, nextBlock.getTypeId())) {
 				break;
 			}
@@ -147,12 +139,10 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * 	Durchläuft ein ArrayList Objekt und verändert die Blöcke
-	 *  vor dem Dispenser. Es ist wichtig, dass es sich bei den
-	 *  Objekten innerhalb um BlockState Objekte handelt,
-	 *  da ein Block Element als Referenz behandelt werden würde
-	 *  und demnach alle nachfolgenden Blöcke mit dem
-	 *  dispensedBlock überschrieben werden würden.
+	 * Go through a ArrayList and changes blocks.
+	 * 
+	 * @param stack Stack to go through
+	 * @param newItem Item that should be appended
 	 *  
 	 */
 	public void proceedBlockStack(ArrayList<BlockState> stack, ItemStack newItem){
@@ -172,10 +162,9 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * Entfernt alle Blöcke in einem BlockStack und droppt diese
-	 * als Item.
+	 * Remove all blocks and drop them.
 	 * 
-	 * @param stack Stack mit den zu bearbeitenden Blöcken
+	 * @param stack Block stack
 	 * 
 	 */
 	public void proceedAndDropBlockStack(ArrayList<BlockState> stack) {
@@ -188,10 +177,9 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * Entfernt alle Blöcke in einem BlockStack und droppt diese
-	 * als Item mit einem bestimmten Werkzeug.
+	 * Drop the items like their mined with a tool.
 	 * 
-	 * @param stack Stack mit den zu bearbeitenden Blöcken
+	 * @param stack Block stack
 	 * 
 	 */
 	public void proceedAndDropBlockStack(ArrayList<BlockState> stack, ItemStack tool) {
@@ -207,27 +195,26 @@ public class BlockListener implements Listener{
 	
 	@EventHandler
 	public void onBlockDispense(BlockDispenseEvent event) {
-		// Dispenser-Objekt erstellen und Blickrichtung festlegen
+		// Create Dispenser-Object and get facing
 		MaterialData d = event.getBlock().getState().getData();
 		Dispenser dispenser = (Dispenser) d;	
 		BlockFace dispenserFacing = dispenser.getFacing();
-		//Block blockBehind = this.getBlockInDirection(event.getBlock(), dispenserFacing.getOppositeFace()); // Block hinter Dispenser zur Verhaltenssteurung ansprechen
-		Block blockBehind = event.getBlock().getRelative(dispenserFacing.getOppositeFace()); // Block hinter dispenser zur Verhaltenssteuerung ansprechen
+		Block blockBehind = event.getBlock().getRelative(dispenserFacing.getOppositeFace()); // this block is relevant for behaivor
 		
-		// Obsidian aktivert Madis
+		// Obsidian or a diamond block enables 'Madis-Features'
 		if(blockBehind.getType() == Material.OBSIDIAN || blockBehind.getType() == Material.DIAMOND_BLOCK) {
-			ItemStack dispensedItem = event.getItem(); 	// Item abfragen, um es später anzuhängen
-			event.setCancelled(true); 					// Abbrechen, da sonst ein Block ausgespuckt wird			
-			// Schaufel
+			ItemStack dispensedItem = event.getItem(); 
+			event.setCancelled(true); 					// cancel event, otherwise its dropped			
+			// Shovel
 			if(this.arrayIntContains(this.shovelIDs, dispensedItem.getTypeId())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.shovelBlocks, dispenserFacing);
-				ItemStack tool = new ItemStack(284); // Goldene Schaufel
+				ItemStack tool = new ItemStack(284); // golden shovel
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
-			//Spitzhacke
+			//Pickaxe
 			else if(this.arrayIntContains(this.pickIDs, dispensedItem.getTypeId())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.pickBlocks, dispenserFacing);
-				ItemStack tool = new ItemStack(285); // Goldene Spitzhacke
+				ItemStack tool = new ItemStack(285); // gold pickaxe
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			else if(dispensedItem.getTypeId() < 96){
