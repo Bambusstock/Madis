@@ -1,6 +1,5 @@
 package me.Bambusstock.Madis;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,33 +15,37 @@ import org.bukkit.material.Dispenser;
 import org.bukkit.material.MaterialData;
 
 public class BlockListener implements Listener{
-	Logger log = Logger.getLogger("Minecraft");
-	
 	/**
 	 * Shovels and their blocks
 	 */
-	final int[] shovelIDs = {284};
-	final int[] shovelBlocks = {0, 2, 3, 12, 13, 78, 80};
+	final Material[] shovelIDs = {Material.GOLD_SPADE};
+	final Material[] shovelBlocks = {	
+			Material.AIR, Material.GRASS, Material.DIRT, 
+			Material.SAND, Material.GRAVEL, Material.SNOW, 
+			Material.SNOW_BLOCK
+		};
 	
 	/**
 	 * Pickaxes and their blocks
 	 */
-	final int[] pickIDs = {285};
-	final int[] pickBlocks = {1, 4, 14, 15, 16, 21, 24, 48, 49, 56, 73, 74};
+	final Material[] pickIDs = {Material.GOLD_PICKAXE};
+	final Material[] pickBlocks = {
+			Material.STONE, Material.COBBLESTONE, Material.GOLD_ORE,
+			Material.IRON_ORE, Material.COAL_ORE, Material.LAPIS_ORE, 
+			Material.SANDSTONE, Material.MOSSY_COBBLESTONE, Material.OBSIDIAN, 
+			Material.DIAMOND_ORE, Material.REDSTONE_ORE, Material.GLOWING_REDSTONE_ORE
+		};
 	
-	public Madis plugin; // important? or depracted?
 		
 	/**
-	 * Search for a value inside a array.
-	 * 
-	 * @param arr Array to go through 
-	 * @param val Target value
-	 * 
-	 * @return true if contained
+	 * Check if a material array contains a specific material
+	 * @param arr Array containing materials
+	 * @param val Specific material
+	 * @return true if array contains what you're searching for
 	 */
-	public Boolean arrayIntContains(int[] arr, int val) {
+	public Boolean arrayContainsMaterial(Material[] arr, Material val) {
 		for(int i=0; i < arr.length; i++) {
-			if(arr[i] == val) return true;
+			if(val.equals(arr[i])) return true;
 		}
 		return false;
 	}
@@ -73,7 +76,7 @@ public class BlockListener implements Listener{
 						w.dropItem(l, gold_ore);
 						break;
 					case LAPIS_ORE:
-						 ItemStack lapis_ore = new ItemStack(Material.LAPIS_BLOCK, 1);
+						ItemStack lapis_ore = new ItemStack(Material.LAPIS_BLOCK, 1);
 						 w.dropItem(l, lapis_ore);
 						break;
 					case REDSTONE_ORE:
@@ -118,21 +121,21 @@ public class BlockListener implements Listener{
 	 * Range amount 128 blocks.
 	 * 
 	 * @param startPos start block
-	 * @param endType block typ
+	 * @param endType material typ
 	 * @param direction direction
 	 * 
 	 * @return Block stack
 	 */
-	public ArrayList<BlockState> readBlocksUntil(Block startPos, int[] endType, BlockFace direction) {
+	public ArrayList<BlockState> readBlocksUntil(Block startPos, Material[] endType, BlockFace direction) {
 		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
 		Block nextBlock = startPos; // dispenser/start block	
 		for(int i=0; i < 128; i++) {
 			nextBlock = nextBlock.getRelative(direction);
 			// Takes one block end break.
-			if(nextBlock.getType() != Material.AIR && !this.arrayIntContains(endType, nextBlock.getTypeId())) {
+			if(nextBlock.getType() != Material.AIR && !this.arrayContainsMaterial(endType, nextBlock.getType())) {
 				break;
 			}
-			else if(nextBlock.getType() != Material.AIR && this.arrayIntContains(endType, nextBlock.getTypeId())) {
+			else if(nextBlock.getType() != Material.AIR && this.arrayContainsMaterial(endType, nextBlock.getType())) {
 				BlockState nextBlockState = nextBlock.getState();					
 				blockStack.add(nextBlockState);
 				break;
@@ -201,20 +204,20 @@ public class BlockListener implements Listener{
 		MaterialData d = event.getBlock().getState().getData();
 		Dispenser dispenser = (Dispenser) d;	
 		BlockFace dispenserFacing = dispenser.getFacing();
-		Block blockBehind = event.getBlock().getRelative(dispenserFacing.getOppositeFace()); // this block is relevant for behaivor
+		Block blockBehind = event.getBlock().getRelative(dispenserFacing.getOppositeFace()); // this block is relevant for behavior
 		
 		// Obsidian or a diamond block enables 'Madis-Features'
 		if(blockBehind.getType() == Material.OBSIDIAN || blockBehind.getType() == Material.DIAMOND_BLOCK) {
 			ItemStack dispensedItem = event.getItem(); 
 			event.setCancelled(true); 					// cancel event, otherwise its dropped			
 			// Shovel
-			if(this.arrayIntContains(this.shovelIDs, dispensedItem.getTypeId())) {
+			if(this.arrayContainsMaterial(this.shovelIDs, dispensedItem.getType())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.shovelBlocks, dispenserFacing);
 				ItemStack tool = new ItemStack(Material.GOLD_SPADE);
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			//Pickaxe
-			else if(this.arrayIntContains(this.pickIDs, dispensedItem.getTypeId())) {
+			else if(this.arrayContainsMaterial(this.pickIDs, dispensedItem.getType())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.pickBlocks, dispenserFacing);
 				ItemStack tool = new ItemStack(Material.GOLD_PICKAXE);
 				this.proceedAndDropBlockStack(blockStack, tool);

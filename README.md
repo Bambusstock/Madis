@@ -1,7 +1,7 @@
 Madis - Magic dispenser for Craftbukkit using the Bukkit-API
 ============================================================
 
-This plugin provide some extra features for your dispenser. Now you can place blocks instead of dropping items. Additionally you have the abillity to mine blocks.
+This plugin provide some extra features for your dispenser. Now you can place blocks instead of dropping items. Additionally you have the ability to mine blocks.
 
 How does it work?
 -----------------
@@ -22,7 +22,7 @@ Known Bugs
 
 Because this plugin is in a early development state there are many known bugs:
 
-- Lapis ore is dropped as block, instead of group of lapis
+- Lapis block is directly dropped, instead of group of lapis
 - The golden tools (pickaxe, shovel) take no damage inside the dispenser
 - The block stack inside the dispenser doesn't decrease (cheat potential ;))
 
@@ -30,5 +30,3 @@ TODO:
 -----
 
 - Bug fixing ;)
-- Add comments
-- Replace Block-IDs with constants
