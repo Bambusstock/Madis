@@ -37,6 +37,22 @@ public class BlockListener implements Listener{
 			Material.DIAMOND_ORE, Material.REDSTONE_ORE, Material.GLOWING_REDSTONE_ORE
 		};
 	
+	/**
+	 * Bucket and blocks.
+	 */
+	final Material[] bucketID = {Material.BUCKET};
+	final Material[] bucketBlocks = {
+			Material.LAVA, Material.STATIONARY_LAVA, 
+			Material.WATER, Material.STATIONARY_WATER
+		};
+
+	/**
+	 * Items that could be placed as block. E.g. water bucket as water block.
+	 */
+	final Material[] specialItems = {
+			Material.WATER_BUCKET, Material.LAVA_BUCKET, Material.REDSTONE
+		};
+	
 		
 	/**
 	 * Check if a material array contains a specific material
@@ -59,10 +75,10 @@ public class BlockListener implements Listener{
 	 * @param tool Tool
 	 */
 	public void dropItems(Block block, ItemStack tool) {
+		World w = block.getWorld();
+		Location l = block.getLocation();
 		switch(tool.getType()) {
 			case GOLD_PICKAXE:
-				World w = block.getWorld();
-				Location l = block.getLocation();
 				switch (block.getType()) {
 					case DIAMOND_ORE:
 						ItemStack diamond_ore = new ItemStack(Material.DIAMOND, 1);
@@ -88,9 +104,45 @@ public class BlockListener implements Listener{
 						block.breakNaturally(tool);					
 				}
 				break;
+			case BUCKET:
+				switch (block.getType()) {
+					case WATER:
+					case STATIONARY_WATER:
+						block.setType(Material.AIR); // remove water
+						ItemStack water_bucket = new ItemStack(Material.WATER_BUCKET, 1);
+						w.dropItem(l, water_bucket);
+						break;
+					case LAVA:
+					case STATIONARY_LAVA:
+						ItemStack lava_bucket = new ItemStack(Material.LAVA_BUCKET, 1);
+						w.dropItem(l, lava_bucket);
+						break;
+				}
 			case GOLD_SPADE:
 			default:
 				block.breakNaturally(tool);
+		}
+	}
+	
+	/**
+	 * Set the new block depending on the dispensed item with the 
+	 * ability e.g. to set a water block instead of dropping a water bucket.
+	 * @param block to change.
+	 * @param Item Item to set.
+	 */
+	public void setDispensedBlock(Block block, ItemStack item) {
+		switch(item.getType()) {
+			case WATER_BUCKET:
+				block.setType(Material.WATER);
+				break;
+			case LAVA_BUCKET:
+				block.setType(Material.LAVA);
+				break;
+			case REDSTONE:
+				block.setType(Material.REDSTONE_WIRE);
+				break;
+			default:	
+				block.setType(item.getType());
 		}
 	}
 	
@@ -122,8 +174,8 @@ public class BlockListener implements Listener{
 	 * Range amount 128 blocks.
 	 * 
 	 * @param startPos start block
-	 * @param endType material typ
 	 * @param direction direction
+	 * @param endType material typ
 	 * 
 	 * @return Block stack
 	 */
@@ -156,9 +208,9 @@ public class BlockListener implements Listener{
 	public void proceedBlockStack(ArrayList<BlockState> stack, ItemStack newItem){
 		for(int i=0; i < stack.size(); i++) {
 			if(i == 0) {
-				BlockState bState = stack.get(i);
-				Block bBlock = bState.getBlock(); 
-				bBlock.setTypeId(newItem.getTypeId());
+				BlockState blockState = stack.get(i);
+				Block block = blockState.getBlock(); 
+				this.setDispensedBlock(block, newItem);
 			}
 			else {
 				BlockState frontBlockState = stack.get(i);
@@ -188,7 +240,7 @@ public class BlockListener implements Listener{
 	 * Drop the items like their mined with a tool.
 	 * 
 	 * @param stack Block stack
-	 * 
+	 * @param tool The tool that mined the Blocks
 	 */
 	public void proceedAndDropBlockStack(ArrayList<BlockState> stack, ItemStack tool) {
 		for(int i=0; i < stack.size(); i++) {
@@ -210,23 +262,36 @@ public class BlockListener implements Listener{
 		// Obsidian or a diamond block enables 'Madis-Features'
 		if(blockBehind.getType() == Material.OBSIDIAN || blockBehind.getType() == Material.DIAMOND_BLOCK) {
 			ItemStack dispensedItem = event.getItem(); 
-			event.setCancelled(true); 					// cancel event, otherwise its dropped			
+			event.setCancelled(true); // cancel event, otherwise its dropped			
+			
 			// Shovel
 			if(this.arrayContainsMaterial(this.shovelIDs, dispensedItem.getType())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing, this.shovelBlocks);
-				ItemStack tool = new ItemStack(Material.GOLD_SPADE);
+				ItemStack tool = new ItemStack(dispensedItem.getType());
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			//Pickaxe
 			else if(this.arrayContainsMaterial(this.pickIDs, dispensedItem.getType())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing, this.pickBlocks);
-				ItemStack tool = new ItemStack(Material.GOLD_PICKAXE);
+				ItemStack tool = new ItemStack(dispensedItem.getType());
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
-			else if(dispensedItem.getTypeId() < 96){
+			// Bucket
+			else if(this.arrayContainsMaterial(this.bucketID, dispensedItem.getType())) {
+				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing, this.bucketBlocks);
+				ItemStack tool = new ItemStack(dispensedItem.getType());
+				this.proceedAndDropBlockStack(blockStack, tool);
+			}
+			// Special items and normal blocks
+			else if(dispensedItem.getTypeId() < 96 || this.arrayContainsMaterial(this.specialItems, dispensedItem.getType())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing);
 				this.proceedBlockStack(blockStack, dispensedItem);
 			}
+			// Items get dropped
+			else {
+				event.setCancelled(false);
+			}
+			
 		}
 	}
 }
