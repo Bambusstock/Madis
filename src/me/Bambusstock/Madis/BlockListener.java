@@ -15,6 +15,7 @@ import org.bukkit.material.Dispenser;
 import org.bukkit.material.MaterialData;
 
 public class BlockListener implements Listener{
+	
 	/**
 	 * Shovels and their blocks
 	 */
@@ -102,7 +103,7 @@ public class BlockListener implements Listener{
 	 *   
 	 *   @return List of blocks until the end.
 	 */
-	public ArrayList<BlockState> readBlocks(Block startPos, BlockFace direction) {
+	public ArrayList<BlockState> readBlocksUntil(Block startPos, BlockFace direction) {
 		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
 		Block nextBlock = startPos; // dispenser/ start block
 		for(int i=0; i < 64; i++) {
@@ -117,7 +118,7 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * Read all blocks until a specified block resp. block typ.
+	 * Read all blocks until a specified block respectively block typ.
 	 * Range amount 128 blocks.
 	 * 
 	 * @param startPos start block
@@ -126,7 +127,7 @@ public class BlockListener implements Listener{
 	 * 
 	 * @return Block stack
 	 */
-	public ArrayList<BlockState> readBlocksUntil(Block startPos, Material[] endType, BlockFace direction) {
+	public ArrayList<BlockState> readBlocksUntil(Block startPos, BlockFace direction, Material[] endType) {
 		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
 		Block nextBlock = startPos; // dispenser/start block	
 		for(int i=0; i < 128; i++) {
@@ -212,18 +213,18 @@ public class BlockListener implements Listener{
 			event.setCancelled(true); 					// cancel event, otherwise its dropped			
 			// Shovel
 			if(this.arrayContainsMaterial(this.shovelIDs, dispensedItem.getType())) {
-				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.shovelBlocks, dispenserFacing);
+				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing, this.shovelBlocks);
 				ItemStack tool = new ItemStack(Material.GOLD_SPADE);
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			//Pickaxe
 			else if(this.arrayContainsMaterial(this.pickIDs, dispensedItem.getType())) {
-				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), this.pickBlocks, dispenserFacing);
+				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing, this.pickBlocks);
 				ItemStack tool = new ItemStack(Material.GOLD_PICKAXE);
 				this.proceedAndDropBlockStack(blockStack, tool);
 			}
 			else if(dispensedItem.getTypeId() < 96){
-				ArrayList<BlockState> blockStack = this.readBlocks(event.getBlock(), dispenserFacing);
+				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing);
 				this.proceedBlockStack(blockStack, dispensedItem);
 			}
 		}
