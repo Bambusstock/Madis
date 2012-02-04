@@ -7,15 +7,16 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Dispenser;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Dispenser;
 import org.bukkit.material.MaterialData;
 
 public class BlockListener implements Listener{
-	
+
 	/**
 	 * Shovels and their blocks
 	 */
@@ -55,9 +56,11 @@ public class BlockListener implements Listener{
 	
 		
 	/**
-	 * Check if a material array contains a specific material
+	 * Check if a material array contains a specific material.
+	 * 
 	 * @param arr Array containing materials
 	 * @param val Specific material
+	 * 
 	 * @return true if array contains what you're searching for
 	 */
 	public Boolean arrayContainsMaterial(Material[] arr, Material val) {
@@ -68,9 +71,41 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * Drop items. Its important to set the amount
-	 * of the ItemStack, else just a 'item picture'
-	 * is dropped. You can take this in your inventory.
+	 * Remove items from a inventory by item stack.
+	 * 
+	 * @param inventory
+	 * @param item Use amount to control amount of items that should be removed .
+	 */
+	public void rmItemFromInventory(Inventory inventory, ItemStack item) {
+	    inventory.removeItem(item);
+	}
+	
+	/**
+	 * Taken from Bukkit source file FurnaceAndDispenser.java.
+	 * 
+	 * @param data
+	 * 
+	 * @return Block Face
+	 */
+	public BlockFace getDispenserFacing(MaterialData d) {
+		byte data = d.getData();
+		switch (data) {
+			case 0x2:
+				return BlockFace.EAST;
+		    case 0x3:
+		        return BlockFace.WEST; 
+		    case 0x4:
+		    	return BlockFace.NORTH;
+		    case 0x5:
+		    default:
+		       	 return BlockFace.SOUTH;
+		}
+	}
+	
+	/**
+	 * Drop items. Its important to set the amount of the item stack 
+	 * else just a 'item picture' is dropped. which couldn't picked up.
+	 * 
 	 * @param block Block
 	 * @param tool Tool
 	 */
@@ -79,44 +114,44 @@ public class BlockListener implements Listener{
 		Location l = block.getLocation();
 		switch(tool.getType()) {
 			case GOLD_PICKAXE:
-				switch (block.getType()) {
-					case DIAMOND_ORE:
-						ItemStack diamond_ore = new ItemStack(Material.DIAMOND, 1);
-						w.dropItem(l, diamond_ore);
-						break;
-					case IRON_ORE:
-						ItemStack iron_ore = new ItemStack(Material.IRON_ORE, 1);
-						w.dropItem(l, iron_ore);
-						break;
-					case GOLD_ORE:
-						ItemStack gold_ore = new ItemStack(Material.GOLD_ORE);
-						w.dropItem(l, gold_ore);
-						break;
-					case LAPIS_ORE:
-						ItemStack lapis_ore = new ItemStack(Material.LAPIS_BLOCK, 1);
-						 w.dropItem(l, lapis_ore);
-						break;
-					case REDSTONE_ORE:
-						ItemStack redstone_ore = new ItemStack(Material.REDSTONE, 4); 
-						w.dropItem(l, redstone_ore);
-						break;
-					default:
-						block.breakNaturally(tool);					
+			    switch (block.getType()) {
+				case DIAMOND_ORE:
+					ItemStack diamond_ore = new ItemStack(Material.DIAMOND, 1);
+					w.dropItem(l, diamond_ore);
+					break;
+				case IRON_ORE:
+					ItemStack iron_ore = new ItemStack(Material.IRON_ORE, 1);
+					w.dropItem(l, iron_ore);
+					break;
+				case GOLD_ORE:
+					ItemStack gold_ore = new ItemStack(Material.GOLD_ORE);
+					w.dropItem(l, gold_ore);
+					break;
+				case LAPIS_ORE:
+					ItemStack lapis_ore = new ItemStack(Material.LAPIS_BLOCK, 1);
+					 w.dropItem(l, lapis_ore);
+					break;
+				case REDSTONE_ORE:
+					ItemStack redstone_ore = new ItemStack(Material.REDSTONE, 4); 
+					w.dropItem(l, redstone_ore);
+					break;
+				default:
+					block.breakNaturally(tool);					
 				}
 				break;
 			case BUCKET:
 				switch (block.getType()) {
-					case WATER:
-					case STATIONARY_WATER:
-						block.setType(Material.AIR); // remove water
-						ItemStack water_bucket = new ItemStack(Material.WATER_BUCKET, 1);
-						w.dropItem(l, water_bucket);
-						break;
-					case LAVA:
-					case STATIONARY_LAVA:
-						ItemStack lava_bucket = new ItemStack(Material.LAVA_BUCKET, 1);
-						w.dropItem(l, lava_bucket);
-						break;
+        				case WATER:
+        				case STATIONARY_WATER:
+        					block.setType(Material.AIR); // remove water
+        					ItemStack water_bucket = new ItemStack(Material.WATER_BUCKET, 1);
+        					w.dropItem(l, water_bucket);
+        					break;
+        				case LAVA:
+        				case STATIONARY_LAVA:
+        					ItemStack lava_bucket = new ItemStack(Material.LAVA_BUCKET, 1);
+        					w.dropItem(l, lava_bucket);
+        					break;
 				}
 			case GOLD_SPADE:
 			default:
@@ -126,7 +161,8 @@ public class BlockListener implements Listener{
 	
 	/**
 	 * Set the new block depending on the dispensed item with the 
-	 * ability e.g. to set a water block instead of dropping a water bucket.
+	 * ability, e.g. to set a water block instead of dropping a water bucket.
+	 * 
 	 * @param block to change.
 	 * @param Item Item to set.
 	 */
@@ -147,13 +183,13 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * 	Read maximal 64 blocks or stops at air block.
-	 *  Blocks save as BlockState-Object, so they can't changed.
+	 * Read maximal 64 blocks or stops at air block.
+	 * Blocks save as BlockState-Object, so they can't changed.
 	 *  
-	 *  @param startPos start
-	 *  @param direction Direction
+	 * @param startPos start
+	 * @param direction Direction
 	 *   
-	 *   @return List of blocks until the end.
+	 * @return List of blocks until the end.
 	 */
 	public ArrayList<BlockState> readBlocksUntil(Block startPos, BlockFace direction) {
 		ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
@@ -170,12 +206,12 @@ public class BlockListener implements Listener{
 	}
 	
 	/**
-	 * Read all blocks until a specified block respectively block typ.
+	 * Read all blocks until a specified block respectively block type.
 	 * Range amount 128 blocks.
 	 * 
 	 * @param startPos start block
 	 * @param direction direction
-	 * @param endType material typ
+	 * @param endType material type
 	 * 
 	 * @return Block stack
 	 */
@@ -201,8 +237,8 @@ public class BlockListener implements Listener{
 	/**
 	 * Go through a ArrayList and changes blocks.
 	 * 
-	 * @param stack Stack to go through
-	 * @param newItem Item that should be appended
+	 * @param stack Stack to go through.
+	 * @param newItem Item that should be appended.
 	 *  
 	 */
 	public void proceedBlockStack(ArrayList<BlockState> stack, ItemStack newItem){
@@ -224,7 +260,7 @@ public class BlockListener implements Listener{
 	/**
 	 * Remove all blocks and drop them.
 	 * 
-	 * @param stack Block stack
+	 * @param stack
 	 * 
 	 */
 	public void proceedAndDropBlockStack(ArrayList<BlockState> stack) {
@@ -240,7 +276,7 @@ public class BlockListener implements Listener{
 	 * Drop the items like their mined with a tool.
 	 * 
 	 * @param stack Block stack
-	 * @param tool The tool that mined the Blocks
+	 * @param tool The tool that mined the blocks
 	 */
 	public void proceedAndDropBlockStack(ArrayList<BlockState> stack, ItemStack tool) {
 		for(int i=0; i < stack.size(); i++) {
@@ -254,15 +290,16 @@ public class BlockListener implements Listener{
 	@EventHandler
 	public void onBlockDispense(BlockDispenseEvent event) {
 		// Create Dispenser-Object and get facing
-		MaterialData d = event.getBlock().getState().getData();
-		Dispenser dispenser = (Dispenser) d;	
-		BlockFace dispenserFacing = dispenser.getFacing();
+		Dispenser dispenser = (Dispenser) event.getBlock().getState();
+		BlockFace dispenserFacing = this.getDispenserFacing(dispenser.getData());
 		Block blockBehind = event.getBlock().getRelative(dispenserFacing.getOppositeFace()); // this block is relevant for behavior
 		
 		// Obsidian or a diamond block enables 'Madis-Features'
 		if(blockBehind.getType() == Material.OBSIDIAN || blockBehind.getType() == Material.DIAMOND_BLOCK) {
-			ItemStack dispensedItem = event.getItem(); 
 			event.setCancelled(true); // cancel event, otherwise its dropped			
+			
+			ItemStack dispensedItem = event.getItem();
+			Inventory dispenserInv = (dispenser).getInventory();
 			
 			// Shovel
 			if(this.arrayContainsMaterial(this.shovelIDs, dispensedItem.getType())) {
@@ -286,6 +323,7 @@ public class BlockListener implements Listener{
 			else if(dispensedItem.getTypeId() < 96 || this.arrayContainsMaterial(this.specialItems, dispensedItem.getType())) {
 				ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing);
 				this.proceedBlockStack(blockStack, dispensedItem);
+				this.rmItemFromInventory(dispenserInv, new ItemStack(dispensedItem.getType(), 1));
 			}
 			// Items get dropped
 			else {
