@@ -24,10 +24,10 @@ Because this plugin is in a early development state there are some known bugs:
 
 - Lapis block is directly dropped, instead of group of lapis
 - The golden tools (pickaxe, shovel) take no damage inside the dispenser (actually I think this isn't a bug. but why not use options)
-- The block stack inside the dispenser doesn't decrease (cheat potential ;))
 
 TODO:
 -----
 
 - Bug fixing ;)
+- Make it configurable
 - Dropped Buckets need to be destroyed after use
