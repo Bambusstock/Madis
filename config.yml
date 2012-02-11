@@ -1,0 +1,36 @@
+creativeMode: false
+dropSpecialItemsAsBlock: true
+specialItems:
+- 1
+shovelIDs:
+- 284
+shovelBlocks:
+- 0
+- 2
+- 3
+- 12
+- 13
+- 78
+- 80
+pickIDs:
+- 285
+pickBlocks:
+- 1
+- 4
+- 14
+- 15
+- 16
+- 21
+- 24
+- 48
+- 49
+- 56
+- 73
+- 74
+bucketIDs:
+- 325
+bucketBlocks:
+- 8
+- 9
+- 10
+- 11
