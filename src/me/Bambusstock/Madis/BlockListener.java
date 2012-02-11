@@ -1,6 +1,7 @@
 package me.Bambusstock.Madis;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,34 +19,31 @@ import org.bukkit.material.MaterialData;
 
 public class BlockListener implements Listener{
     
+    Logger log = Logger.getLogger("Minecraft");
+    
     private Madis plugin;
+    List<Integer> activateBlocks;
+    List<Integer> bucketIDs;
+    List<Integer> bucketBlocks;
+    List<Integer> pickIDs;
+    List<Integer> pickBlocks;
+    List<Integer> shovelIDs;
+    List<Integer> shovelBlocks;
+    List<Integer> specialItems;
     
     public BlockListener(Madis instance) {
 	this.plugin = instance;
+	
+	activateBlocks 	= this.plugin.getConfig().getIntegerList("activateBlocks");
+	bucketIDs 	= this.plugin.getConfig().getIntegerList("bukcetID");
+	bucketBlocks 	= this.plugin.getConfig().getIntegerList("bucketBlocks");
+	pickIDs 	= this.plugin.getConfig().getIntegerList("pickIDs");
+	pickBlocks 	= this.plugin.getConfig().getIntegerList("pickBlocks");
+	shovelIDs 	= this.plugin.getConfig().getIntegerList("shovelIDs");
+	shovelBlocks 	= this.plugin.getConfig().getIntegerList("shovelBlocks");
+	specialItems 	= this.plugin.getConfig().getIntegerList("specialItems");
     }
-
-    /**
-     * Shovels and their blocks
-     */
-    final List<Integer> shovelIDs = this.plugin.getConfig().getIntegerList("shovelIDs");
-    final List<Integer> shovelBlocks = this.plugin.getConfig().getIntegerList("shovelBlocks");
-
-    /**
-     * Pickaxes and their blocks
-     */
-    final List<Integer> pickIDs = this.plugin.getConfig().getIntegerList("pickIDs");
-    final List<Integer> pickBlocks = this.plugin.getConfig().getIntegerList("pickBlocks");
-   
-    /**
-     * Bucket and blocks.
-     */
-    final List<Integer> bucketIDs = this.plugin.getConfig().getIntegerList("bukcetID");
-    final List<Integer> bucketBlocks = this.plugin.getConfig().getIntegerList("bucketBlocks");
-
-    /**
-     * Items that could be placed as block. E.g. water bucket as water block.
-     */
-    final List<Integer> specialItems = this.plugin.getConfig().getIntegerList("specialItems");
+    
 
     /**
      * Remove items from a inventory by item stack.
@@ -175,13 +173,16 @@ public class BlockListener implements Listener{
     public ArrayList<BlockState> readBlocksUntil(Block startPos, BlockFace direction) {
 	ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
 	Block nextBlock = startPos; // dispenser/ start block
-	for(int i=0; i < 64; i++) {
+	for(int i=0; i < this.plugin.getConfig().getInt("setRange", 64); i++) {
 	    nextBlock = nextBlock.getRelative(direction);
 	    BlockState nextBlockState = nextBlock.getState();					
 	    blockStack.add(nextBlockState);
 
 	    // exit if their is a air block
-	    if(nextBlock.getType() == Material.AIR) i = 64;
+	    if(nextBlock.getType() == Material.AIR) i = this.plugin.getConfig().getInt("setRange", 64);
+	}
+	if(blockStack.size() == 64) {
+	    blockStack.clear();
 	}
 	return blockStack;
     }
@@ -199,7 +200,7 @@ public class BlockListener implements Listener{
     public ArrayList<BlockState> readBlocksUntil(Block startPos, BlockFace direction, List<Integer> endType) {
 	ArrayList<BlockState> blockStack = new ArrayList<BlockState>(); // hold blocks
 	Block nextBlock = startPos; // dispenser/start block	
-	for(int i=0; i < 128; i++) {
+	for(int i=0; i < this.plugin.getConfig().getInt("breakRange", 128); i++) {
 	    nextBlock = nextBlock.getRelative(direction);
 	    // Takes one block end break.
 	    if(nextBlock.getType() != Material.AIR && !endType.contains(nextBlock.getTypeId())) {
@@ -276,7 +277,7 @@ public class BlockListener implements Listener{
 	Block blockBehind = event.getBlock().getRelative(dispenserFacing.getOppositeFace()); // this block is relevant for behavior
 
 	// Obsidian or a diamond block enables 'Madis-Features'
-	if(blockBehind.getType() == Material.OBSIDIAN || blockBehind.getType() == Material.DIAMOND_BLOCK) {
+	if(this.activateBlocks.contains(blockBehind.getTypeId())) {
 	    event.setCancelled(true); // cancel event, otherwise its dropped			
 
 	    ItemStack dispensedItem = event.getItem();
@@ -304,7 +305,7 @@ public class BlockListener implements Listener{
 	    else if(dispensedItem.getTypeId() < 96 || this.specialItems.contains(dispensedItem.getTypeId())) {
 		ArrayList<BlockState> blockStack = this.readBlocksUntil(event.getBlock(), dispenserFacing);
 		this.proceedBlockStack(blockStack, dispensedItem);
-		this.rmItemFromInventory(dispenserInv, new ItemStack(dispensedItem.getType(), 1));
+		if(blockStack.size() > 0) this.rmItemFromInventory(dispenserInv, new ItemStack(dispensedItem.getType(), 1));
 	    }
 	    // Items get dropped
 	    else {
