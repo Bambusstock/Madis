@@ -98,12 +98,14 @@ Because this plugin is in a early development state there are some known bugs:
 TODO:
 -----
 
-- Use lists instead of array
 - Bug fixing ;)
 	- Dropped Buckets need to be destroyed after use
 	- damage to used items
+	- use Permissions and provide method to change configuration from ingame console
 - Extend options:
 	- provide method to define special items => `specialItems`
-	- define other or add blocks to obsidian, diamond block => `activateBlock`
 	- items could be destroyed used to break blocks with tools => `damageToItems`
-	- self defined ranges (research for redstone and ranges) => `miningRange`, `placingRange`
+	
+Thanks to:
+----------
+The guys of the #bukkitdev channel. You guys are awesome! :)
