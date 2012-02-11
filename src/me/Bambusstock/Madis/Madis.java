@@ -7,8 +7,8 @@ public class Madis extends JavaPlugin{
     Logger log = Logger.getLogger("Minecraft");
     
     public void onEnable() {
-	log.info("Madis 0.3 enabled. It's magic!");
 	getServer().getPluginManager().registerEvents(new BlockListener(this), this);
+	log.info("Madis 0.3 enabled. It's magic!");
     }
 
     public void onDisable() {
